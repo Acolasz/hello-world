@@ -19,13 +19,22 @@ class App extends Component {
         };
     };
 
-    componentDidMount() {
-        //fetch('http://192.168.99.100:31278/sentiment')
-          fetch('http://jsonplaceholder.typicode.com/users')  
-            .then(response => response.json())
-            .then((data) => 
-                {this.setState({ products: data })
-        });
+    analyzeSentence() {
+        fetch('http://localhost:9090/product/1', {
+            method: 'GET',
+            // headers: {
+            //     'Content-Type': 'application/json'
+            // },
+            // body: JSON.stringify({sentence: this.textField.getValue()})
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Something went wrong ...');
+                }
+            })
+            .then(data => this.setState({polarity: 0.25, sentence: data.name}));
     }
 
     onEnterPress = e => {
