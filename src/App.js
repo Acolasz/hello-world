@@ -4,7 +4,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import Paper from 'material-ui/Paper';
-import Contacts from './components/Contacts';
+import Polarity from "./components/Polarity";
 
 const style = {
     marginLeft: 12,
@@ -14,28 +14,17 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            products: [],
-            valami: undefined
+            sentence: '',
+            polarity: undefined
         };
     };
 
     analyzeSentence() {
-        fetch('http://localhost:9090/product/1', {
-            method: 'GET',
-            // headers: {
-            //     'Content-Type': 'application/json'
-            // },
-            // body: JSON.stringify({sentence: this.textField.getValue()})
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong ...');
-                }
-            })
-            .then(data => this.setState({polarity: 0.25, sentence: data.name}));
+        fetch('http://localhost:9090/products')
+            .then(response => response.json())
+            .then(data => this.setState({polarity: 0.25, sentence: data.name}));    
     }
+            
 
     onEnterPress = e => {
         if (e.key === 'Enter') {
@@ -44,8 +33,22 @@ class App extends Component {
     };
 
     render() {
+        const polarityComponent = this.state.polarity !== undefined ?
+            <Polarity sentence={this.state.sentence} polarity={this.state.polarity}/> :
+            null;
+
         return (
-            <Contacts contacts={this.state.products} />
+            <MuiThemeProvider>
+                <div className="centerize">
+                    <Paper zDepth={1} className="content">
+                        <h2>Sentiment Analyser</h2>
+                        <TextField ref={ref => this.textField = ref} onKeyUp={this.onEnterPress.bind(this)}
+                                   hintText="Type your sentence."/>
+                        <RaisedButton  label="Send" style={style} onClick={this.analyzeSentence.bind(this)}/>
+                        {polarityComponent}
+                    </Paper>
+                </div>
+            </MuiThemeProvider>
         );
     }
 }
